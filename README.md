@@ -1,69 +1,72 @@
-# Welcome to your Lovable project
 
-## Project info
+# Shopify Product Sync App
 
-**URL**: https://lovable.dev/projects/db78bc33-d61c-4d6e-a837-88fc51bfe6ed
+This application is designed to sync and manage Shopify products, designed for later integration with Gadget.dev.
 
-## How can I edit this code?
+## Overview
 
-There are several ways of editing your application.
+This React application provides a user interface for:
+- Viewing and managing Shopify product data
+- Monitoring synchronization status
+- Managing product metafields
 
-**Use Lovable**
+## Transferring to Gadget.dev
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/db78bc33-d61c-4d6e-a837-88fc51bfe6ed) and start prompting.
+This frontend application is designed to be paired with a Gadget.dev backend. To connect this application to Gadget.dev:
 
-Changes made via Lovable will be committed automatically to this repo.
+1. Create a new Gadget.dev application
+2. Set up the necessary models in Gadget.dev:
+   - Product
+   - ProductVariant
+   - ProductImage
+   - Metafield
+   - SyncStatus
 
-**Use your preferred IDE**
+3. Configure Shopify connections in your Gadget.dev app
+4. Set up webhooks for product updates
+5. Implement the necessary APIs and actions in Gadget.dev
+6. Update the `src/services/gadgetService.ts` file to use the Gadget.dev JavaScript client
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Gadget.dev Client Integration
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+Replace the mock implementation in `gadgetService.ts` with the actual Gadget.dev client:
 
-Follow these steps:
+```typescript
+import { Gadget } from '@gadgetinc/api-client-core';
+import { Client } from './gadget-api'; // Generated client from your Gadget app
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+let gadgetClient: Client;
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+export const gadgetService = {
+  initializeGadgetClient: (apiKey: string, endpoint: string) => {
+    gadgetClient = new Client({
+      apiKey,
+      endpoint,
+    });
+    return gadgetClient;
+  },
+  
+  getProducts: async (options: FilterOptions) => {
+    const result = await gadgetClient.products.findMany({
+      // Convert options to Gadget query format
+    });
+    return result.data;
+  },
 
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+  // Implement other methods similarly
+}
 ```
 
-**Edit a file directly in GitHub**
+## Features
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+- Product listing and filtering
+- Sync status monitoring
+- Mock data structure ready for Gadget.dev integration
+- Responsive design
+- Type definitions aligned with Gadget.dev data model
 
-**Use GitHub Codespaces**
+## Development
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with .
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/db78bc33-d61c-4d6e-a837-88fc51bfe6ed) and click on Share -> Publish.
-
-## I want to use a custom domain - is that possible?
-
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+1. Clone this repository
+2. Install dependencies: `npm install`
+3. Start the development server: `npm run dev`
