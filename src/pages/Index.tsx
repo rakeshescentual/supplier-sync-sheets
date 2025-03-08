@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +8,7 @@ import ProductList from "@/components/products/ProductList";
 import SyncStatus from "@/components/sync/SyncStatus";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, FileText } from "lucide-react";
 
 const Index = () => {
   const { toast } = useToast();
@@ -32,6 +33,9 @@ const Index = () => {
         <div className="flex gap-2">
           <Button onClick={() => navigate("/new-product")} variant="outline">
             <PlusCircle className="h-4 w-4 mr-2" /> Add Product
+          </Button>
+          <Button onClick={() => navigate("/new-line-form")} variant="outline">
+            <FileText className="h-4 w-4 mr-2" /> New Line Form
           </Button>
           <Button onClick={handleSync} className="shrink-0">
             Sync Products
