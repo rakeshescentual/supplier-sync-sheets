@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,9 +6,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProductList from "@/components/products/ProductList";
 import SyncStatus from "@/components/sync/SyncStatus";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
+import { PlusCircle } from "lucide-react";
 
 const Index = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   
   const handleSync = () => {
@@ -27,9 +29,14 @@ const Index = () => {
           <h1 className="text-3xl font-bold tracking-tight">Product Sync Dashboard</h1>
           <p className="text-muted-foreground">Manage and synchronize Shopify products with ease</p>
         </div>
-        <Button onClick={handleSync} className="shrink-0">
-          Sync Products
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={() => navigate("/new-product")} variant="outline">
+            <PlusCircle className="h-4 w-4 mr-2" /> Add Product
+          </Button>
+          <Button onClick={handleSync} className="shrink-0">
+            Sync Products
+          </Button>
+        </div>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
