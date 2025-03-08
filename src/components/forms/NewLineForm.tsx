@@ -1,4 +1,4 @@
-<lov-code>
+
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -405,7 +405,7 @@ const NewLineForm = () => {
 
   React.useEffect(() => {
     const subscription = form.watch((data) => {
-      calculateCompletion(data);
+      calculateCompletion(data as FormValues);
     });
     return () => subscription.unsubscribe();
   }, [form.watch]);
@@ -794,3 +794,41 @@ const NewLineForm = () => {
                   </div>
                   <div className="mt-3 text-sm text-muted-foreground flex justify-between">
                     <span>Form completion: {completionPercentage}%</span>
+                    <span>{fieldsCompleted} of {totalFields} fields completed</span>
+                  </div>
+                </div>
+
+                <div className="flex justify-between pt-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={saveAsDraft}
+                    className="flex items-center gap-2"
+                  >
+                    Save as Draft
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    disabled={isSubmitting}
+                    className="flex items-center gap-2"
+                  >
+                    {isSubmitting ? (
+                      <>Processing...</>
+                    ) : (
+                      <>
+                        Submit Form
+                        <ArrowRight size={16} />
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+      </div>
+    </ScrollArea>
+  );
+};
+
+export default NewLineForm;
