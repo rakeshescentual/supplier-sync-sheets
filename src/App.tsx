@@ -7,6 +7,7 @@ import NewProduct from "@/pages/NewProduct";
 import NewLineForm from "@/pages/NewLineForm";
 import NotFound from "@/pages/NotFound";
 import { Toaster } from "@/components/ui/sonner";
+import GadgetSettings from "@/pages/GadgetSettings";
 import "./App.css";
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
           <Route path="/" element={<Index />} />
           <Route path="/new-product" element={<NewProduct />} />
           <Route path="/new-line-form" element={<NewLineForm />} />
+          <Route path="/gadget-settings" element={<GadgetSettings />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
