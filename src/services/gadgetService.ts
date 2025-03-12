@@ -65,10 +65,24 @@ export const gadgetService = {
       id: "new-id",
       title: product.title || "",
       description: product.description || "",
-      price: product.price || "0",
-      sku: product.sku || "",
-      status: "unsynced",
-      variants: 0,
+      status: "active",
+      syncStatus: "unsynced",
+      handle: product.handle || `product-${Date.now()}`,
+      variants: [
+        {
+          id: "variant-1",
+          title: "Default Variant",
+          price: 0,
+          position: 1,
+          inventoryQuantity: 0,
+          requiresShipping: true,
+          taxable: true,
+          optionValues: {}
+        }
+      ],
+      images: [],
+      metafields: [],
+      createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     });
   },
