@@ -77,7 +77,8 @@ export const gadgetService = {
           inventoryQuantity: 0,
           requiresShipping: true,
           taxable: true,
-          optionValues: {}
+          optionValues: {},
+          metafields: [] // Added the missing metafields property as required by ProductVariant
         }
       ],
       images: [],
