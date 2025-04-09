@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { CheckCircle, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { gadgetService } from "@/services/gadgetService";
+import { configureGadget } from "@/services/gadgetService";
 
 const GadgetConfig: React.FC = () => {
   const { toast } = useToast();
@@ -28,7 +28,7 @@ const GadgetConfig: React.FC = () => {
     setIsLoading(true);
     try {
       // In a real implementation, this would connect to Gadget.dev
-      gadgetService.initializeGadgetClient(apiKey, endpoint);
+      configureGadget(apiKey, endpoint);
       
       // Simulate successful connection
       await new Promise(resolve => setTimeout(resolve, 1000));
