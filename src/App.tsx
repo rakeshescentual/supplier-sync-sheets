@@ -8,6 +8,7 @@ import NewLineForm from "@/pages/NewLineForm";
 import NotFound from "@/pages/NotFound";
 import { Toaster } from "@/components/ui/sonner";
 import GadgetSettings from "@/pages/GadgetSettings";
+import ShopifyDevAssistant from "@/pages/ShopifyDevAssistant";
 import "./App.css";
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
           <Route path="/new-product" element={<NewProduct />} />
           <Route path="/new-line-form" element={<NewLineForm />} />
           <Route path="/gadget-settings" element={<GadgetSettings />} />
+          <Route path="/shopify-dev-assistant" element={<ShopifyDevAssistant />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
