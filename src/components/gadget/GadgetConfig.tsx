@@ -1,12 +1,13 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { CheckCircle, AlertCircle } from "lucide-react";
+import { CheckCircle, AlertCircle, RefreshCw, Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { configureGadget } from "@/services/gadgetService";
+import { configureGadget, isGadgetConfigured, getGadgetConfig } from "@/services/gadgetService";
+import { Switch } from "@/components/ui/switch";
 
 const GadgetConfig: React.FC = () => {
   const { toast } = useToast();
@@ -14,6 +15,21 @@ const GadgetConfig: React.FC = () => {
   const [endpoint, setEndpoint] = useState("");
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [useConnectionPooling, setUseConnectionPooling] = useState(true);
+  const [useAdvancedFeatures, setUseAdvancedFeatures] = useState(false);
+
+  useEffect(() => {
+    // Check if Gadget is already configured
+    const isConfigured = isGadgetConfigured();
+    if (isConfigured) {
+      const config = getGadgetConfig();
+      if (config.apiKey && config.endpoint) {
+        setApiKey(config.apiKey);
+        setEndpoint(config.endpoint);
+        setIsConnected(true);
+      }
+    }
+  }, []);
 
   const handleConnect = async () => {
     if (!apiKey || !endpoint) {
@@ -78,8 +94,45 @@ const GadgetConfig: React.FC = () => {
           </p>
         </div>
 
-        <Button onClick={handleConnect} disabled={isLoading}>
-          {isLoading ? "Connecting..." : "Connect to Gadget"}
+        <div className="space-y-4 mt-2">
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="connection-pooling">Use Connection Pooling</Label>
+              <p className="text-xs text-muted-foreground">
+                Improves performance for multiple requests
+              </p>
+            </div>
+            <Switch
+              id="connection-pooling"
+              checked={useConnectionPooling}
+              onCheckedChange={setUseConnectionPooling}
+            />
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="advanced-features">Use Advanced Features</Label>
+              <p className="text-xs text-muted-foreground">
+                Enable background jobs and transaction support
+              </p>
+            </div>
+            <Switch
+              id="advanced-features"
+              checked={useAdvancedFeatures}
+              onCheckedChange={setUseAdvancedFeatures}
+            />
+          </div>
+        </div>
+
+        <Button onClick={handleConnect} disabled={isLoading} className="mt-2">
+          {isLoading ? (
+            <>
+              <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+              Connecting...
+            </>
+          ) : (
+            "Connect to Gadget"
+          )}
         </Button>
       </div>
 
@@ -98,9 +151,18 @@ const GadgetConfig: React.FC = () => {
         <p className="text-sm text-muted-foreground">
           This application is designed to work with a Gadget.dev backend. Create a Gadget app with models for Products, ProductVariants, Metafields, and SyncStatus to get started.
         </p>
-        <p className="text-sm text-muted-foreground">
-          Configure your Gadget app to connect to Shopify and set up the necessary webhooks for product data syncing.
-        </p>
+        <Alert className="bg-blue-50 border-blue-200 mt-2">
+          <Shield className="h-4 w-4 text-blue-500" />
+          <AlertTitle>Latest Gadget Features</AlertTitle>
+          <AlertDescription>
+            <ul className="list-disc list-inside space-y-1 text-sm">
+              <li>Background Jobs: Process long-running tasks asynchronously</li>
+              <li>Transaction Support: Ensure data consistency with atomic operations</li>
+              <li>Enhanced API Client: Improved connection pooling and response management</li>
+              <li>File Storage: Upload and manage files with metadata support</li>
+            </ul>
+          </AlertDescription>
+        </Alert>
       </div>
     </div>
   );
