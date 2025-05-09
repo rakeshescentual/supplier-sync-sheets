@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,90 +10,67 @@ import {
   Wifi, 
   WifiOff, 
   AlertTriangle, 
-  CheckCircle, 
-  Loader 
+  Loader,
+  Activity
 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import {
-  initMCPConnection,
-  disconnectMCP,
-  getConnectionStatus,
-  loadConnectionsFromLocalStorage,
-  saveConnectionToLocalStorage,
-  removeConnectionFromLocalStorage,
-  type MCPConnectionInfo
-} from "@/services/shopifyDevAssistantService";
+import { useShopifyDevAssistant } from "@/contexts/ShopifyDevAssistantContext";
+import { checkMCPConnectionHealth } from "@/services/shopifyDevAssistantService";
+import { useState as useStateHook } from "react";
 
 const ShopifyConnectionManager: React.FC = () => {
-  const { toast } = useToast();
+  const { connections, isConnecting, connect, disconnect } = useShopifyDevAssistant();
   const [apiKey, setApiKey] = useState("");
   const [endpoint, setEndpoint] = useState("https://mcp.shopify.com/dev-assistant");
   const [storeUrl, setStoreUrl] = useState("");
   const [useAI, setUseAI] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
-  const [connections, setConnections] = useState<MCPConnectionInfo[]>([]);
-  
-  useEffect(() => {
-    // Load saved connections on component mount
-    const savedConnections = loadConnectionsFromLocalStorage();
-    setConnections(savedConnections);
-  }, []);
+  const [connectionHealth, setConnectionHealth] = useState<Record<string, { 
+    isChecking: boolean; 
+    latency?: number; 
+    status?: string;
+  }>>({});
 
   const handleConnect = async () => {
     if (!apiKey || !storeUrl) {
-      toast({
-        title: "Missing Information",
-        description: "Please provide both API key and Store URL",
-        variant: "destructive",
-      });
       return;
     }
 
-    setIsLoading(true);
-    try {
-      const connection = await initMCPConnection({
-        apiKey,
-        endpoint,
-        storeUrl,
-        useAI
-      });
-      
-      saveConnectionToLocalStorage(connection);
-      setConnections(prev => [...prev, connection]);
-      
-      toast({
-        title: "Connected to Shopify Dev Assistant",
-        description: `Successfully connected to ${storeUrl}`,
-      });
-    } catch (error) {
-      console.error("Failed to connect to Shopify Dev Assistant:", error);
-      toast({
-        title: "Connection Failed",
-        description: "Failed to connect to Shopify Dev Assistant. Please check your credentials.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    await connect({
+      apiKey,
+      endpoint,
+      storeUrl,
+      useAI
+    });
   };
 
   const handleDisconnect = async (connectionId: string) => {
+    await disconnect(connectionId);
+  };
+
+  const checkConnectionHealth = async (connectionId: string) => {
+    setConnectionHealth(prev => ({
+      ...prev,
+      [connectionId]: { ...prev[connectionId], isChecking: true }
+    }));
+    
     try {
-      await disconnectMCP(connectionId);
-      removeConnectionFromLocalStorage(connectionId);
-      setConnections(prev => prev.filter(conn => conn.id !== connectionId));
-      
-      toast({
-        title: "Disconnected",
-        description: "Successfully disconnected from Shopify Dev Assistant"
-      });
+      const health = await checkMCPConnectionHealth(connectionId);
+      setConnectionHealth(prev => ({
+        ...prev,
+        [connectionId]: { 
+          isChecking: false, 
+          latency: health.latency,
+          status: health.status
+        }
+      }));
     } catch (error) {
-      console.error("Failed to disconnect:", error);
-      toast({
-        title: "Disconnect Failed",
-        description: "Failed to disconnect from Shopify Dev Assistant",
-        variant: "destructive",
-      });
+      console.error("Error checking connection health:", error);
+      setConnectionHealth(prev => ({
+        ...prev,
+        [connectionId]: { 
+          isChecking: false, 
+          status: 'error'
+        }
+      }));
     }
   };
 
@@ -139,10 +116,28 @@ const ShopifyConnectionManager: React.FC = () => {
               onCheckedChange={setUseAI}
             />
           </div>
+          
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="endpoint">MCP Endpoint</Label>
+              <p className="text-xs text-muted-foreground">
+                Advanced: Custom MCP server endpoint
+              </p>
+            </div>
+            <div className="w-2/3">
+              <Input
+                id="endpoint"
+                type="text"
+                value={endpoint}
+                onChange={(e) => setEndpoint(e.target.value)}
+                placeholder="https://mcp.shopify.com/dev-assistant"
+              />
+            </div>
+          </div>
         </div>
 
-        <Button onClick={handleConnect} disabled={isLoading} className="mt-2">
-          {isLoading ? (
+        <Button onClick={handleConnect} disabled={isConnecting} className="mt-2">
+          {isConnecting ? (
             <>
               <Loader className="h-4 w-4 mr-2 animate-spin" />
               Connecting...
@@ -174,17 +169,37 @@ const ShopifyConnectionManager: React.FC = () => {
                   )}
                   <span className="font-medium">{connection.config.storeUrl}</span>
                 </div>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => handleDisconnect(connection.id)}
-                >
-                  Disconnect
-                </Button>
+                <div className="space-x-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => checkConnectionHealth(connection.id)}
+                    disabled={connectionHealth[connection.id]?.isChecking}
+                  >
+                    {connectionHealth[connection.id]?.isChecking ? (
+                      <Loader className="h-3 w-3 animate-spin" />
+                    ) : (
+                      <Activity className="h-3 w-3 mr-1" />
+                    )}
+                    <span className="ml-1">Health</span>
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => handleDisconnect(connection.id)}
+                  >
+                    Disconnect
+                  </Button>
+                </div>
               </div>
               <div className="mt-2 text-sm text-muted-foreground">
                 {connection.connectedAt && (
                   <p>Connected since: {new Date(connection.connectedAt).toLocaleString()}</p>
+                )}
+                {connectionHealth[connection.id]?.latency !== undefined && (
+                  <p className="mt-1">
+                    Latency: <span className="font-medium">{connectionHealth[connection.id].latency}ms</span>
+                  </p>
                 )}
               </div>
             </div>
