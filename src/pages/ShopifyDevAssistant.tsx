@@ -18,6 +18,7 @@ const ShopifyDevAssistant = () => {
   } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedConnectionId, setSelectedConnectionId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<string>("connection");
   
   useEffect(() => {
     // Load saved connections on component mount
@@ -44,6 +45,10 @@ const ShopifyDevAssistant = () => {
     }
   };
   
+  const switchToConnectionTab = () => {
+    setActiveTab("connection");
+  };
+  
   return (
     <div className="container py-6">
       <div className="mb-6">
@@ -53,7 +58,7 @@ const ShopifyDevAssistant = () => {
         </p>
       </div>
 
-      <Tabs defaultValue="connection">
+      <Tabs defaultValue="connection" value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="mb-4">
           <TabsTrigger value="connection">Connection</TabsTrigger>
           <TabsTrigger value="assistant">Dev Assistant</TabsTrigger>
@@ -164,7 +169,7 @@ const ShopifyDevAssistant = () => {
                   <p className="mb-4 text-muted-foreground">
                     Connect to a Shopify store to get started with the Dev Assistant.
                   </p>
-                  <Button variant="outline" onClick={() => document.querySelector('[data-value="connection"]')?.click()}>
+                  <Button variant="outline" onClick={switchToConnectionTab}>
                     <Server className="h-4 w-4 mr-2" />
                     Set Up Connection
                   </Button>
