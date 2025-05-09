@@ -1,16 +1,16 @@
 
 // Shopify Dev Assistant service for MCP (Multi Connection Protocol) connections
 
-type MCPConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'error';
+export type MCPConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'error';
 
-type MCPConnectionConfig = {
+export type MCPConnectionConfig = {
   endpoint: string;
   apiKey: string;
   storeUrl: string;
   useAI: boolean;
 };
 
-type MCPConnectionInfo = {
+export type MCPConnectionInfo = {
   id: string;
   status: MCPConnectionStatus;
   config: MCPConnectionConfig;
